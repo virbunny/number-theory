@@ -1,6 +1,6 @@
 {
-  "name": "米兔的數論工具箱",
-  "short_name": "數論工具箱",
+  "name": "米兔數論工具箱",
+  "short_name": "米兔數論",
   "description": "小學數學常用數論與單位換算工具。",
   "id": "./?app=mitu-number-toolbox",
   "start_url": "./",

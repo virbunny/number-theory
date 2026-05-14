@@ -1,4 +1,4 @@
-# 米兔的數論工具箱 PWA V41-PWA
+# 米兔數論工具箱 PWA V42-PWA
 
 ## 內容
 - `index.html`：PWA 入口檔
@@ -12,3 +12,10 @@
 
 ## 注意
 PWA 安裝必須使用 HTTPS，單純用本機 `file://` 開啟不會出現正式安裝效果。
+
+
+## 本次更新
+- 畫面標題改為：米兔數論工具箱
+- HTML `<title>` 改為：米兔數論工具箱
+- manifest app name 同步改為：米兔數論工具箱
+- Service Worker cache 升級為 V42-PWA，降低舊快取殘留。
