@@ -1,0 +1,1486 @@
+<!-- // 2026-05-14 23:27:46;來自厲害的Chatgpt V41-PWA -->
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#070b14" />
+  <meta name="application-name" content="米兔的數論工具箱" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="數論工具箱" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+  <link rel="icon" type="image/png" href="./icons/favicon.png" />
+  <title>米兔的數論工具箱</title>
+  <style>
+    :root {
+      --bg:#070b14;
+      --card:#0b1220;
+      --card2:#0e1730;
+      --text:#e8eefc;
+      --muted:#a7b3d6;
+      --line:rgba(255,255,255,0.08);
+      --accent:#7dd3fc;
+      --danger:#fb7185;
+      --ok:#86efac;
+      --shadow:0 10px 30px rgba(0,0,0,0.45);
+    }
+    * { box-sizing:border-box; }
+    html { height:100%; scroll-behavior:smooth; overflow:hidden; }
+    body {
+      height:100%;
+      margin:0;
+      overflow:hidden;
+      background:var(--bg);
+      color:var(--text);
+      font-family:ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans TC", Arial, sans-serif;
+    }
+    .wrap { height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+    :root { --bottom-extra-space: 3.4em; }
+    .header {
+      position:relative;
+      z-index:10;
+      flex:0 0 auto;
+      background:linear-gradient(180deg, rgba(7,11,20,0.99), rgba(7,11,20,0.88));
+      backdrop-filter:blur(12px);
+      border-bottom:1px solid var(--line);
+      padding:16px 16px 12px;
+      box-shadow:0 10px 24px rgba(0,0,0,0.22);
+    }
+    .appTitle { font-size:24px; font-weight:900; letter-spacing:0.4px; }
+    .titleWithIcon { display:flex; align-items:center; justify-content:center; gap:12px; width:100%; text-align:center; }
+    .titleTextWrap { display:inline-flex; align-items:baseline; gap:0.5em; }
+    .titleVerInline { font-size:12px; color:#f5c542; font-weight:700; letter-spacing:0.3px; }
+    .titleIcon { width:52px; height:52px; object-fit:contain; border-radius:10px; flex:0 0 auto; filter:drop-shadow(0 4px 10px rgba(0,0,0,0.25)); }
+    .subTitle { margin-top:4px; font-size:12.5px; color:var(--muted); line-height:1.45; }
+    .jumpRow { display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; justify-content:center; }
+    .jumpBtn {
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:11px 15px; border-radius:18px; border:1px solid rgba(255,255,255,0.10);
+      background:linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.05)); color:var(--text); text-decoration:none; font-size:14px;
+      appearance:none;
+      -webkit-appearance:none;
+      cursor:pointer;
+      font-family:inherit;
+      box-shadow:0 6px 14px rgba(0,0,0,0.24), inset 0 1px 0 rgba(255,255,255,0.08);
+      transition:transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+    }
+    .tabBtn {
+      background:linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.06));
+    }
+    .jumpBtn:hover {
+      transform:translateY(-1px);
+      box-shadow:0 10px 18px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.10);
+    }
+    .jumpBtn:active {
+      transform:translateY(1px);
+      box-shadow:0 3px 8px rgba(0,0,0,0.22), inset 0 2px 4px rgba(0,0,0,0.18);
+    }
+    .activeTabBtn {
+      background:linear-gradient(180deg, rgba(245,197,66,0.34), rgba(245,197,66,0.14));
+      border-color:rgba(245,197,66,0.72);
+      color:#ffd86a;
+      font-weight:800;
+      box-shadow:0 8px 18px rgba(0,0,0,0.24), inset 0 1px 0 rgba(255,255,255,0.16);
+    }
+    .tabSection {
+      display:none;
+    }
+    .tabSection.activeTabSection {
+      display:block;
+    }
+    .select {
+      width:100%;
+      padding:14px 13px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,0.04);
+      color:var(--text);
+      outline:none;
+      font-size:17px;
+    }
+    .select:focus {
+      border-color:rgba(125,211,252,0.55);
+      box-shadow:0 0 0 3px rgba(125,211,252,0.12);
+    }
+    .compareLine {
+      position:relative;
+      height:82px;
+      margin-top:10px;
+    }
+    .compareAxis {
+      position:absolute;
+      left:0; right:0;
+      top:40px;
+      height:4px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.18);
+    }
+    .compareTickLabel {
+      position:absolute;
+      top:50px;
+      font-size:12px;
+      color:var(--muted);
+      transform:translateX(-50%);
+      white-space:nowrap;
+    }
+    .compareTickLabel.start { left:0; transform:none; }
+    .compareTickLabel.end { right:0; left:auto; transform:none; }
+    .compareMarker {
+      position:absolute;
+      top:10px;
+      transform:translateX(-50%);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:4px;
+      text-align:center;
+    }
+    .compareDot {
+      width:14px; height:14px;
+      border-radius:50%;
+      background:var(--accent);
+      box-shadow:0 0 0 3px rgba(125,211,252,0.15);
+    }
+    .compareMarker.markerB .compareDot {
+      background:#f5c542;
+      box-shadow:0 0 0 3px rgba(245,197,66,0.15);
+    }
+    .compareMarker span {
+      font-size:12px;
+      font-weight:700;
+      color:var(--text);
+      white-space:nowrap;
+    }
+
+    .main {
+      flex:1 1 auto;
+      min-height:0;
+      overflow-y:auto;
+      -webkit-overflow-scrolling:touch;
+      overscroll-behavior:contain;
+      padding:18px 16px calc(32px + var(--bottom-extra-space));
+      max-width:1000px;
+      width:100%;
+      margin:0 auto;
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+    }
+    .card {
+      background:linear-gradient(180deg, rgba(11,18,32,0.96), rgba(14,23,48,0.86));
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:16px;
+      box-shadow:var(--shadow);
+      scroll-margin-top:86px;
+    }
+    h2 { margin:0 0 14px; font-size:20px; color:#f5c542; }
+    .field { display:flex; flex-direction:column; gap:6px; }
+    .label { font-size:13.5px; color:var(--muted); }
+    .input {
+      width:100%;
+      padding:14px 13px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,0.04);
+      color:var(--text);
+      outline:none;
+      font-size:17px;
+    }
+    .input:focus { border-color:rgba(125,211,252,0.55); box-shadow:0 0 0 3px rgba(125,211,252,0.12); }
+    .shortInputs {
+      display:flex;
+      gap:12px;
+      flex-wrap:nowrap;
+      align-items:flex-start;
+    }
+    .shortInputWrap {
+      width:140px;
+      flex:0 0 140px;
+    }
+    @media (max-width:380px) {
+      .shortInputs { flex-wrap:wrap; }
+      .shortInputWrap { width:100%; flex:1 1 100%; }
+    }
+    .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .compactPair {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+    .compactPair .input {
+      padding:12px 10px;
+      font-size:16px;
+    }
+    .stack { display:flex; flex-direction:column; gap:12px; }
+    .divider { height:1px; background:var(--line); margin:14px 0; }
+    .result {
+      background:rgba(255,255,255,0.02);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px;
+    }
+    .resultTitle { font-size:13px; font-weight:800; margin-bottom:6px; }
+    .resultBody { margin-top:8px; }
+    .meta { font-size:12px; color:var(--muted); margin-top:8px; line-height:1.45; }
+    .muted { color:var(--muted); }
+    .error { color:var(--danger); font-size:12.5px; line-height:1.4; }
+    .ok { color:var(--ok); font-size:12.5px; }
+    .hint { color:var(--muted); font-size:12.5px; line-height:1.45; }
+    .bigNumber { font-size:23px; font-weight:900; letter-spacing:0.2px; line-height:1.45; word-break:break-word; }
+    .chips { display:flex; flex-wrap:wrap; gap:8px; }
+    .chip {
+      border:1px solid var(--line);
+      background:rgba(255,255,255,0.03);
+      padding:7px 10px; border-radius:999px; font-size:12.5px;
+    }
+    .pillRow { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+    .pill {
+      padding:7px 10px; border-radius:999px;
+      border:1px solid rgba(125,211,252,0.25);
+      background:rgba(125,211,252,0.08);
+      font-size:12.5px;
+    }
+    .btnRow { display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; align-items:center; }
+    .copyBtn {
+      border:1px solid var(--line);
+      background:rgba(255,255,255,0.05);
+      color:var(--text);
+      padding:10px 12px; border-radius:12px;
+      cursor:pointer; font-size:13px;
+    }
+    .copyBtn:disabled { opacity:0.45; cursor:not-allowed; }
+    .smallCard {
+      background:rgba(255,255,255,0.02);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px;
+      margin-top:12px;
+    }
+    .footNote { color:var(--muted); font-size:12.5px; line-height:1.5; }
+    .accent { color:var(--accent); }
+    @media (max-width:760px) {
+      .header { padding:18px 14px 14px; }
+      .main {
+        padding:14px 12px calc(24px + var(--bottom-extra-space));
+        gap:14px;
+        overflow-y:auto;
+        -webkit-overflow-scrolling:touch;
+      }
+      .card { padding:15px 14px; border-radius:16px; }
+      .appTitle { font-size:28px; }
+      .titleVerInline { font-size:11px; }
+      .titleIcon { width:58px; height:58px; }
+      .jumpRow { gap:10px; }
+      .jumpRow .jumpBtn { flex:1 1 calc(50% - 10px); min-width:138px; }
+      .grid2 { grid-template-columns:1fr; }
+      .compactPair { grid-template-columns:1fr 1fr; gap:8px; }
+      .compactPair .input { padding:11px 9px; font-size:16px; }
+      .bigNumber { font-size:23px; }
+      .label { font-size:14px; }
+      .input, .select { font-size:17px; }
+      h2 { font-size:22px; text-align:center; }
+      .resultTitle { font-size:14px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="header">
+      <div class="appTitle titleWithIcon"><img class="titleIcon" src="data:image/png;base64,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" alt="app icon" /><span class="titleTextWrap"><span>米兔的數論工具箱</span><span class="titleVerInline">V41-PWA</span></span></div>
+      
+<div class="jumpRow tabBar">
+        <button class="jumpBtn tabBtn activeTabBtn" type="button" data-tab-target="factorlist">列出因數</button>
+        <button class="jumpBtn tabBtn" type="button" data-tab-target="factor">質因數分解</button>
+        <button class="jumpBtn tabBtn" type="button" data-tab-target="prime">質數檢驗</button>
+        <button class="jumpBtn tabBtn" type="button" data-tab-target="gcdlcm">GCD / LCM</button>
+        <button class="jumpBtn tabBtn" type="button" data-tab-target="fraction">最簡分數</button>
+        <button class="jumpBtn tabBtn" type="button" data-tab-target="decimalFraction">小數 / 分數互轉</button>
+        <button class="jumpBtn tabBtn" type="button" data-tab-target="unitConvert">單位換算</button>
+        <button class="jumpBtn tabBtn" type="button" data-tab-target="timeDiff">兩個時間差</button>
+        <button class="jumpBtn tabBtn" type="button" data-tab-target="timeCalc">時間乘除</button>
+        <button class="jumpBtn tabBtn" type="button" data-tab-target="compareFraction">分數大小比較</button>
+        <button class="jumpBtn tabBtn" type="button" data-tab-target="chickenRabbit">雞兔同籠</button>
+        <button class="jumpBtn" id="clearAllBtn" type="button">一鍵清空</button>
+      </div>
+    </header>
+
+    <main class="main">
+
+<section class="card tabSection activeTabSection" id="factorlist">
+        <h2>列出因數（獨立功能）</h2>
+
+        <label class="field">
+          <div class="label">要列出因數的整數 n</div>
+          <input class="input auto-select" id="factorListStr" placeholder="例如 36" inputmode="numeric" />
+        </label>
+
+        <div class="meta" style="margin-top:10px">可換算：長度、重量、容積 / 體積、面積、時間</div>
+
+        <div class="result" style="margin-top:12px">
+          <div class="resultTitle">因數列表</div>
+          <div class="ok" id="factorListStatus">✅ 可用</div>
+          <div class="resultBody" id="factorListBody"><div class="hint">請先輸入 n</div></div>
+        </div>
+      </section>
+
+      <section class="card tabSection" id="factor">
+        <h2>質因數分解（獨立功能）</h2>
+
+        <label class="field">
+          <div class="label">要分解的整數 n</div>
+          <input class="input auto-select" id="factorStr" placeholder="例如 360" inputmode="numeric" />
+        </label>
+
+        <div class="btnRow">
+          <button class="copyBtn" id="factorClearBtn">清空</button>
+          <button class="copyBtn" id="copyPowerBtn">複製次方格式</button>
+          <button class="copyBtn" id="copyExpandedBtn">複製展開格式</button>
+          <span class="hint" id="copyMsg"></span>
+        </div>
+
+        <div class="result">
+          <div class="resultTitle">分解結果</div>
+          <div class="ok" id="factorStatus">✅ 可用</div>
+          <div class="resultBody" id="factorBody"><div class="hint">請先輸入 n</div></div>
+        </div>
+
+        <div class="grid2">
+          <div class="smallCard">
+            <div class="resultTitle">完整展開</div>
+            <div id="factorExpandedBody"><div class="hint">請先輸入 n</div></div>
+          </div>
+
+          <div class="smallCard">
+            <div class="resultTitle">質因數次數</div>
+            <div id="factorCountBody"><div class="hint">請先輸入 n</div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card tabSection" id="prime">
+        <h2>質數檢驗</h2>
+
+        <div class="grid2">
+          <div class="stack">
+            <label class="field">
+              <div class="label">要檢驗是否為質數的整數 n</div>
+              <input class="input auto-select" id="primeCheckStr" placeholder="例如 97" inputmode="numeric" />
+            </label>
+            <div class="result">
+              <div class="resultTitle">質數檢驗結果</div>
+              <div class="ok" id="primeCheckStatus">✅ 可用</div>
+              <div class="resultBody" id="primeCheckBody"><div class="hint">請先輸入 n</div></div>
+            </div>
+          </div>
+
+          <div class="stack">
+            <div class="grid2">
+              <label class="field">
+                <div class="label">範圍起點</div>
+                <input class="input auto-select" id="rangeStartStr" placeholder="例如 1" inputmode="numeric" />
+              </label>
+              <label class="field">
+                <div class="label">範圍終點</div>
+                <input class="input auto-select" id="rangeEndStr" placeholder="例如 200" inputmode="numeric" />
+              </label>
+            </div>
+            <div class="result">
+              <div class="resultTitle">範圍內的質數</div>
+              <div class="ok" id="primeRangeStatus">✅ 可用</div>
+              <div class="resultBody" id="primeRangeBody"><div class="hint">請先輸入起點與終點</div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card tabSection" id="gcdlcm">
+        <h2>最大公因數（GCD）/ 最小公倍數（LCM）</h2>
+
+        <div class="shortInputs">
+          <label class="field shortInputWrap">
+            <div class="label">整數 A</div>
+            <input class="input auto-select" id="aStr" placeholder="例如 12" inputmode="numeric" />
+          </label>
+          <label class="field shortInputWrap">
+            <div class="label">整數 B</div>
+            <input class="input auto-select" id="bStr" placeholder="例如 18" inputmode="numeric" />
+          </label>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="grid2" style="margin-top:12px">
+          <div class="result">
+            <div class="resultTitle">最大公因數（GCD）</div>
+            <div class="ok" id="gcdStatus">✅ 可用</div>
+            <div class="resultBody" id="gcdBody"><div class="hint">請先輸入 A、B</div></div>
+          </div>
+          <div class="result">
+            <div class="resultTitle">最小公倍數（LCM）</div>
+            <div class="ok" id="lcmStatus">✅ 可用</div>
+            <div class="resultBody" id="lcmBody"><div class="hint">請先輸入 A、B</div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card tabSection" id="fraction">
+        <h2>最簡分數</h2>
+
+        <div class="compactPair">
+          <label class="field">
+            <div class="label">分子（整數）</div>
+            <input class="input auto-select" id="numStr" placeholder="例如 42" inputmode="numeric" />
+          </label>
+          <label class="field">
+            <div class="label">分母（整數）</div>
+            <input class="input auto-select" id="denStr" placeholder="例如 56" inputmode="numeric" />
+          </label>
+        </div>
+
+        <div class="result" style="margin-top:12px">
+          <div class="resultTitle">化簡結果</div>
+          <div class="ok" id="fractionStatus">✅ 可用</div>
+          <div class="resultBody" id="fractionBody"><div class="hint">請先輸入分子與分母</div></div>
+        </div>
+      </section>
+
+      <section class="card tabSection" id="decimalFraction">
+        <h2>小數 / 分數互轉</h2>
+
+        <div class="grid2">
+          <div class="result">
+            <div class="resultTitle">小數 → 分數</div>
+            <label class="field">
+              <div class="label">小數</div>
+              <input class="input auto-select" id="decimalStr" placeholder="例如 0.375" inputmode="decimal" />
+            </label>
+            <div class="resultBody" id="decimalToFractionBody"><div class="hint">請先輸入小數</div></div>
+          </div>
+
+          <div class="result">
+            <div class="resultTitle">分數 → 小數</div>
+            <div class="compactPair">
+              <label class="field">
+                <div class="label">分子</div>
+                <input class="input auto-select" id="convertNumStr" placeholder="例如 3" inputmode="numeric" />
+              </label>
+              <label class="field">
+                <div class="label">分母</div>
+                <input class="input auto-select" id="convertDenStr" placeholder="例如 8" inputmode="numeric" />
+              </label>
+            </div>
+            <div class="resultBody" id="fractionToDecimalBody"><div class="hint">請先輸入分子與分母</div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card tabSection" id="unitConvert">
+        <h2>單位換算</h2>
+
+        <div class="grid2">
+          <label class="field">
+            <div class="label">數值</div>
+            <input class="input auto-select" id="unitValueStr" placeholder="例如 2.5" inputmode="decimal" />
+          </label>
+          <label class="field">
+            <div class="label">類別</div>
+            <select class="select" id="unitCategory">
+              <option value="length">長度</option>
+              <option value="weight">重量</option>
+              <option value="capacityVolume">容積 / 體積</option>
+              <option value="area">面積</option>
+              <option value="time">時間</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="grid2" style="margin-top:12px">
+          <label class="field">
+            <div class="label">從</div>
+            <select class="select" id="unitFrom">
+              <option value="km">公里</option>
+              <option value="m">公尺</option>
+              <option value="cm">公分</option>
+              <option value="mm">毫米</option>
+            </select>
+          </label>
+          <label class="field">
+            <div class="label">換成</div>
+            <select class="select" id="unitTo">
+              <option value="km">公里</option>
+              <option value="m" selected>公尺</option>
+              <option value="cm">公分</option>
+              <option value="mm">毫米</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="result" style="margin-top:12px">
+          <div class="resultTitle">換算結果</div>
+          <div class="ok" id="unitStatus">✅ 可用</div>
+          <div class="resultBody" id="unitBody"><div class="hint">請先輸入數值</div></div>
+        </div>
+      </section>
+
+      <section class="card tabSection" id="timeDiff">
+        <h2>兩個時間差</h2>
+
+        <div class="grid2">
+          <label class="field">
+            <div class="label">開始時間</div>
+            <input class="input" id="startTimeStr" type="time" />
+          </label>
+          <label class="field">
+            <div class="label">結束時間</div>
+            <input class="input" id="endTimeStr" type="time" />
+          </label>
+        </div>
+
+        <div class="result" style="margin-top:12px">
+          <div class="resultTitle">時間差</div>
+          <div class="ok" id="timeDiffStatus">✅ 可用</div>
+          <div class="resultBody" id="timeDiffBody"><div class="hint">請先輸入開始時間與結束時間</div></div>
+        </div>
+      </section>
+
+
+      <section class="card tabSection" id="timeCalc">
+        <h2>時間的乘除</h2>
+
+        <div class="shortInputs">
+          <label class="field shortInputWrap">
+            <div class="label">時</div>
+            <input class="input auto-select" id="tcHourStr" placeholder="例如 1" inputmode="numeric" />
+          </label>
+          <label class="field shortInputWrap">
+            <div class="label">分</div>
+            <input class="input auto-select" id="tcMinStr" placeholder="例如 20" inputmode="numeric" />
+          </label>
+          <label class="field shortInputWrap">
+            <div class="label">秒</div>
+            <input class="input auto-select" id="tcSecStr" placeholder="例如 30" inputmode="numeric" />
+          </label>
+        </div>
+
+        <div class="shortInputs" style="margin-top:12px">
+          <label class="field shortInputWrap">
+            <div class="label">運算</div>
+            <select class="select" id="tcOp">
+              <option value="mul">×</option>
+              <option value="div">÷</option>
+            </select>
+          </label>
+          <label class="field shortInputWrap">
+            <div class="label">數字</div>
+            <input class="input auto-select" id="tcFactorStr" placeholder="例如 3" inputmode="numeric" />
+          </label>
+        </div>
+
+        <div class="result" style="margin-top:12px">
+          <div class="resultTitle">計算結果</div>
+          <div class="ok" id="timeCalcStatus">✅ 可用</div>
+          <div class="resultBody" id="timeCalcBody"><div class="hint">請先輸入時間與要乘除的數字</div></div>
+        </div>
+
+        <div class="result" style="margin-top:12px">
+          <div class="resultTitle">計算步驟</div>
+          <div class="resultBody" id="timeCalcStepBody"><div class="hint">請先輸入時間與要乘除的數字</div></div>
+        </div>
+      </section>
+
+      <section class="card tabSection" id="compareFraction">
+        <h2>數線 / 分數大小比較</h2>
+
+        <div class="grid2">
+          <div class="result">
+            <div class="resultTitle">分數 A</div>
+            <div class="compactPair">
+              <label class="field">
+                <div class="label">分子</div>
+                <input class="input auto-select" id="cmpNum1Str" placeholder="例如 3" inputmode="numeric" />
+              </label>
+              <label class="field">
+                <div class="label">分母</div>
+                <input class="input auto-select" id="cmpDen1Str" placeholder="例如 4" inputmode="numeric" />
+              </label>
+            </div>
+          </div>
+          <div class="result">
+            <div class="resultTitle">分數 B</div>
+            <div class="compactPair">
+              <label class="field">
+                <div class="label">分子</div>
+                <input class="input auto-select" id="cmpNum2Str" placeholder="例如 5" inputmode="numeric" />
+              </label>
+              <label class="field">
+                <div class="label">分母</div>
+                <input class="input auto-select" id="cmpDen2Str" placeholder="例如 8" inputmode="numeric" />
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="result" style="margin-top:12px">
+          <div class="resultTitle">比較結果</div>
+          <div class="ok" id="compareStatus">✅ 可用</div>
+          <div class="resultBody" id="compareBody"><div class="hint">請先輸入兩個分數</div></div>
+        </div>
+
+        <div class="result" style="margin-top:12px">
+          <div class="resultTitle">數線</div>
+          <div class="resultBody" id="compareLineBody"><div class="hint">請先輸入兩個分數</div></div>
+        </div>
+      </section>
+
+
+      <section class="card tabSection" id="chickenRabbit">
+        <h2>雞兔同籠</h2>
+
+        <div class="grid2">
+          <label class="field">
+            <div class="label">頭的總數</div>
+            <input class="input auto-select" id="crHeadStr" placeholder="例如 10" inputmode="numeric" />
+          </label>
+          <label class="field">
+            <div class="label">腳的總數</div>
+            <input class="input auto-select" id="crLegStr" placeholder="例如 28" inputmode="numeric" />
+          </label>
+        </div>
+
+        <div class="result" style="margin-top:12px">
+          <div class="resultTitle">解題結果</div>
+          <div class="ok" id="crStatus">✅ 可用</div>
+          <div class="resultBody" id="crBody"><div class="hint">請先輸入頭數與腳數</div></div>
+        </div>
+
+        <div class="result" style="margin-top:12px">
+          <div class="resultTitle">解題步驟</div>
+          <div class="resultBody" id="crStepBody"><div class="hint">請先輸入頭數與腳數</div></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    // 2026-05-14 23:27:46;來自厲害的Chatgpt V41-PWA
+
+    function escapeHtml(s) {
+      return String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function parseIntMaybe(s) {
+      if (typeof s !== "string") return { ok:false, empty:false, value:0, msg:"輸入不是字串" };
+      const trimmed = s.trim();
+      if (trimmed === "") return { ok:false, empty:true, value:0, msg:"" };
+      if (!/^[+-]?\d+$/.test(trimmed)) return { ok:false, empty:false, value:0, msg:"請輸入有效整數（不可有小數/其他字元）" };
+      const n = Number(trimmed);
+      if (!Number.isFinite(n)) return { ok:false, empty:false, value:0, msg:"數字太大或無效" };
+      if (!Number.isSafeInteger(n)) return { ok:false, empty:false, value:0, msg:"超過安全整數範圍（|n| > 9,007,199,254,740,991）" };
+      return { ok:true, empty:false, value:n, msg:"" };
+    }
+
+    function absInt(n) {
+      return Math.abs(n);
+    }
+
+    function gcd(x, y) {
+      x = absInt(x);
+      y = absInt(y);
+      while (y !== 0) {
+        const t = x % y;
+        x = y;
+        y = t;
+      }
+      return x;
+    }
+
+    function lcm(x, y) {
+      if (x === 0 || y === 0) return 0;
+      const g = gcd(x, y);
+      const val = absInt((x / g) * y);
+      if (!Number.isSafeInteger(val)) return null;
+      return val;
+    }
+
+    function listFactors(n) {
+      const an = absInt(n);
+      if (an === 0) return null;
+      const small = [];
+      const large = [];
+      const r = Math.floor(Math.sqrt(an));
+      for (let i = 1; i <= r; i++) {
+        if (an % i === 0) {
+          small.push(i);
+          const j = an / i;
+          if (j !== i) large.push(j);
+        }
+      }
+      large.reverse();
+      return small.concat(large);
+    }
+
+    function isPrime(n) {
+      if (!Number.isInteger(n)) return false;
+      if (n <= 1) return false;
+      if (n <= 3) return true;
+      if (n % 2 === 0 || n % 3 === 0) return false;
+      for (let i = 5; i * i <= n; i += 6) {
+        if (n % i === 0 || n % (i + 2) === 0) return false;
+      }
+      return true;
+    }
+
+    function primeFactorization(n) {
+      if (!Number.isInteger(n) || n <= 0) return { error:"質因數分解只接受正整數（大於 0）" };
+      if (n === 1) return { factors:[] };
+      const out = [];
+      let x = n;
+
+      let count = 0;
+      while (x % 2 === 0) {
+        x /= 2;
+        count++;
+      }
+      if (count) out.push([2, count]);
+
+      count = 0;
+      while (x % 3 === 0) {
+        x /= 3;
+        count++;
+      }
+      if (count) out.push([3, count]);
+
+      for (let f = 5; f * f <= x; f += 6) {
+        let c1 = 0;
+        while (x % f === 0) {
+          x /= f;
+          c1++;
+        }
+        if (c1) out.push([f, c1]);
+
+        const fp = f + 2;
+        let c2 = 0;
+        while (x % fp === 0) {
+          x /= fp;
+          c2++;
+        }
+        if (c2) out.push([fp, c2]);
+      }
+
+      if (x > 1) out.push([x, 1]);
+      return { factors:out };
+    }
+
+    function formatPower(facObj) {
+      if (!facObj) return "";
+      if (facObj.error) return facObj.error;
+      if (facObj.special) return facObj.special;
+      const factors = facObj.factors || [];
+      if (factors.length === 0) return "1（空的質因數分解）";
+      return factors.map(([p, e]) => e === 1 ? `${p}` : `${p}^${e}`).join(" × ");
+    }
+
+    function formatExpanded(facObj) {
+      if (!facObj) return "";
+      if (facObj.error) return facObj.error;
+      if (facObj.special) return facObj.special;
+      const factors = facObj.factors || [];
+      if (factors.length === 0) return "1";
+      const arr = [];
+      for (const [p, e] of factors) {
+        for (let i = 0; i < e; i++) arr.push(String(p));
+      }
+      return arr.join(" × ");
+    }
+
+    function simplifyFraction(num, den) {
+      if (den === 0) return { ok:false, msg:"分母不可為 0" };
+      if (num === 0) return { ok:true, num:0, den:1 };
+      const sign = (num < 0) ^ (den < 0) ? -1 : 1;
+      const a = absInt(num);
+      const b = absInt(den);
+      const g = gcd(a, b);
+      return { ok:true, num:sign * (a / g), den:b / g };
+    }
+
+    function parseDecimalMaybe(s) {
+      if (typeof s !== "string") return { ok:false, empty:false, value:0, msg:"輸入不是字串" };
+      const trimmed = s.trim();
+      if (trimmed === "") return { ok:false, empty:true, value:0, msg:"" };
+      if (!/^[+-]?(?:\d+|\d*\.\d+)$/.test(trimmed)) return { ok:false, empty:false, value:0, msg:"請輸入有效小數" };
+      const n = Number(trimmed);
+      if (!Number.isFinite(n)) return { ok:false, empty:false, value:0, msg:"數字太大或無效" };
+      return { ok:true, empty:false, value:n, msg:"", raw:trimmed };
+    }
+
+    function decimalStringToFraction(s) {
+      const trimmed = s.trim();
+      const sign = trimmed.startsWith("-") ? -1 : 1;
+      const unsigned = trimmed.replace(/^[-+]/, "");
+      if (!unsigned.includes(".")) {
+        return simplifyFraction(sign * Number(unsigned), 1);
+      }
+      const [intPart, fracPart] = unsigned.split(".");
+      const denominator = 10 ** fracPart.length;
+      const numerator = sign * (Number(intPart || "0") * denominator + Number(fracPart || "0"));
+      return simplifyFraction(numerator, denominator);
+    }
+
+    function formatDecimalValue(value) {
+      if (!Number.isFinite(value)) return "—";
+      const rounded = Number(value.toFixed(10));
+      return String(rounded).replace(/\.0+$/, "").replace(/(\.\d*?)0+$/, "$1");
+    }
+
+    function formatByFourDigits(value) {
+      const plain = formatDecimalValue(value);
+      if (plain === "—") return plain;
+
+      let sign = "";
+      let unsigned = plain;
+      if (unsigned.startsWith("-")) {
+        sign = "-";
+        unsigned = unsigned.slice(1);
+      }
+
+      const parts = unsigned.split(".");
+      const intPart = parts[0] || "0";
+      const fracPart = parts.length > 1 ? parts[1] : "";
+      const groupedInt = intPart.replace(/\B(?=(\d{4})+(?!\d))/g, ",");
+
+      return sign + groupedInt + (fracPart ? "." + fracPart : "");
+    }
+
+    const UNIT_OPTIONS = {
+      length: [
+        { value:"km", label:"公里", factor:1000 },
+        { value:"m", label:"公尺", factor:1 },
+        { value:"cm", label:"公分", factor:0.01 },
+        { value:"mm", label:"毫米", factor:0.001 }
+      ],
+      weight: [
+        { value:"t", label:"公噸", factor:1000 },
+        { value:"kg", label:"公斤", factor:1 },
+        { value:"g", label:"公克", factor:0.001 }
+      ],
+      capacityVolume: [
+        { value:"m3", label:"立方公尺", factor:1000 },
+        { value:"kL", label:"公秉", factor:1000 },
+        { value:"L", label:"公升", factor:1 },
+        { value:"dm3", label:"立方公寸", factor:1 },
+        { value:"mL", label:"毫升", factor:0.001 },
+        { value:"cm3", label:"立方公分", factor:0.001 },
+        { value:"mm3", label:"立方毫米", factor:0.000001 }
+      ],
+      area: [
+        { value:"km2", label:"平方公里", factor:1000000 },
+        { value:"ha", label:"公頃", factor:10000 },
+        { value:"a", label:"公畝", factor:100 },
+        { value:"m2", label:"平方公尺", factor:1 },
+        { value:"cm2", label:"平方公分", factor:0.0001 },
+        { value:"mm2", label:"平方毫米", factor:0.000001 }
+      ],
+      time: [
+        { value:"h", label:"小時", factor:3600 },
+        { value:"min", label:"分鐘", factor:60 },
+        { value:"s", label:"秒", factor:1 }
+      ]
+    };
+
+    function syncUnitSelectOptions() {
+      const categoryEl = document.getElementById("unitCategory");
+      const fromEl = document.getElementById("unitFrom");
+      const toEl = document.getElementById("unitTo");
+      if (!categoryEl || !fromEl || !toEl) return;
+      const category = categoryEl.value;
+      const items = UNIT_OPTIONS[category] || [];
+      const prevFrom = fromEl.value;
+      const prevTo = toEl.value;
+      fromEl.innerHTML = items.map((u) => `<option value="${u.value}">${u.label}</option>`).join("");
+      toEl.innerHTML = items.map((u) => `<option value="${u.value}">${u.label}</option>`).join("");
+      fromEl.value = items.some((u) => u.value === prevFrom) ? prevFrom : (items[0] ? items[0].value : "");
+      toEl.value = items.some((u) => u.value === prevTo) ? prevTo : (items[1] ? items[1].value : (items[0] ? items[0].value : ""));
+    }
+
+    function getUnitItem(category, value) {
+      return (UNIT_OPTIONS[category] || []).find((u) => u.value === value) || null;
+    }
+
+    function parseTimeMaybe(s) {
+      if (typeof s !== "string") return { ok:false, empty:false, minutes:0, msg:"格式錯誤" };
+      const trimmed = s.trim();
+      if (trimmed === "") return { ok:false, empty:true, minutes:0, msg:"" };
+      const m = trimmed.match(/^(\d{2}):(\d{2})$/);
+      if (!m) return { ok:false, empty:false, minutes:0, msg:"請輸入有效時間" };
+      const hh = Number(m[1]);
+      const mm = Number(m[2]);
+      if (hh < 0 || hh > 23 || mm < 0 || mm > 59) return { ok:false, empty:false, minutes:0, msg:"請輸入有效時間" };
+      return { ok:true, empty:false, minutes:hh * 60 + mm, msg:"" };
+    }
+
+    function formatTimeHMS(totalSeconds) {
+      if (!Number.isFinite(totalSeconds)) return "—";
+      const sign = totalSeconds < 0 ? "-" : "";
+      let sec = Math.abs(totalSeconds);
+
+      const hours = Math.floor(sec / 3600);
+      sec -= hours * 3600;
+      const minutes = Math.floor(sec / 60);
+      sec -= minutes * 60;
+
+      let secText = formatDecimalValue(sec);
+      return `${sign}${hours}時 ${minutes}分 ${secText}秒`;
+    }
+
+    function buildCompareLine(v1, v2, label1, label2) {
+      let min = Math.min(0, v1, v2);
+      let max = Math.max(1, v1, v2);
+      if (min === max) max = min + 1;
+      const span = max - min;
+      const p1 = ((v1 - min) / span) * 100;
+      const p2 = ((v2 - min) / span) * 100;
+      return `
+        <div class="compareLine">
+          <div class="compareAxis"></div>
+          <div class="compareMarker markerA" style="left:${p1}%">
+            <div class="compareDot"></div>
+            <span>A：${escapeHtml(label1)}</span>
+          </div>
+          <div class="compareMarker markerB" style="left:${p2}%">
+            <div class="compareDot"></div>
+            <span>B：${escapeHtml(label2)}</span>
+          </div>
+          <div class="compareTickLabel start">${escapeHtml(formatDecimalValue(min))}</div>
+          <div class="compareTickLabel end">${escapeHtml(formatDecimalValue(max))}</div>
+        </div>
+      `;
+    }
+
+    function primesInRange(L, R) {
+      L = Math.floor(L);
+      R = Math.floor(R);
+      if (R < 2) return [];
+      if (L < 2) L = 2;
+      if (L > R) return [];
+      const span = R - L + 1;
+      if (span > 2000000) {
+        return { error:`範圍太大（${span.toLocaleString()} 個整數）。請縮小到 2,000,000 以內。` };
+      }
+
+      const limit = Math.floor(Math.sqrt(R));
+      const isCompositeBase = new Uint8Array(limit + 1);
+      const basePrimes = [];
+      for (let i = 2; i <= limit; i++) {
+        if (!isCompositeBase[i]) {
+          basePrimes.push(i);
+          if (i * i <= limit) {
+            for (let j = i * i; j <= limit; j += i) isCompositeBase[j] = 1;
+          }
+        }
+      }
+
+      const mark = new Uint8Array(span);
+      for (const p of basePrimes) {
+        const start = Math.max(p * p, Math.ceil(L / p) * p);
+        for (let x = start; x <= R; x += p) mark[x - L] = 1;
+      }
+
+      const out = [];
+      for (let i = 0; i < span; i++) {
+        if (mark[i] === 0) out.push(L + i);
+      }
+      return out;
+    }
+
+    function chipsHtml(items) {
+      if (!items || items.length === 0) return '<div class="muted">（空）</div>';
+      return `<div class="chips">${items.map(t => `<span class="chip">${escapeHtml(String(t))}</span>`).join("")}</div>`;
+    }
+
+    function pillsHtml(items) {
+      if (!items || items.length === 0) return '<div class="muted">（空）</div>';
+      return `<div class="pillRow">${items.join("")}</div>`;
+    }
+
+    function setStatus(elId, errorMsg) {
+      const el = document.getElementById(elId);
+      el.className = errorMsg ? "error" : "ok";
+      el.textContent = errorMsg ? `⚠️ ${errorMsg}` : "✅ 可用";
+    }
+
+    function render() {
+      const aStr = document.getElementById("aStr").value;
+      const bStr = document.getElementById("bStr").value;
+      const primeCheckStr = document.getElementById("primeCheckStr").value;
+      const rangeStartStr = document.getElementById("rangeStartStr").value;
+      const rangeEndStr = document.getElementById("rangeEndStr").value;
+      const factorListStr = document.getElementById("factorListStr").value;
+      const factorStr = document.getElementById("factorStr").value;
+      const numStr = document.getElementById("numStr").value;
+      const denStr = document.getElementById("denStr").value;
+      const decimalStr = document.getElementById("decimalStr").value;
+      const convertNumStr = document.getElementById("convertNumStr").value;
+      const convertDenStr = document.getElementById("convertDenStr").value;
+      const unitValueStr = document.getElementById("unitValueStr").value;
+      const unitCategory = document.getElementById("unitCategory").value;
+      const unitFrom = document.getElementById("unitFrom").value;
+      const unitTo = document.getElementById("unitTo").value;
+      const startTimeStr = document.getElementById("startTimeStr").value;
+      const endTimeStr = document.getElementById("endTimeStr").value;
+      const tcHourStr = document.getElementById("tcHourStr").value;
+      const tcMinStr = document.getElementById("tcMinStr").value;
+      const tcSecStr = document.getElementById("tcSecStr").value;
+      const tcOp = document.getElementById("tcOp").value;
+      const tcFactorStr = document.getElementById("tcFactorStr").value;
+      const cmpNum1Str = document.getElementById("cmpNum1Str").value;
+      const cmpDen1Str = document.getElementById("cmpDen1Str").value;
+      const cmpNum2Str = document.getElementById("cmpNum2Str").value;
+      const cmpDen2Str = document.getElementById("cmpDen2Str").value;
+      const crHeadStr = document.getElementById("crHeadStr").value;
+      const crLegStr = document.getElementById("crLegStr").value;
+
+      const aParsed = parseIntMaybe(aStr);
+      const bParsed = parseIntMaybe(bStr);
+      const primeCheckParsed = parseIntMaybe(primeCheckStr);
+      const rangeStartParsed = parseIntMaybe(rangeStartStr);
+      const rangeEndParsed = parseIntMaybe(rangeEndStr);
+      const factorListParsed = parseIntMaybe(factorListStr);
+      const factorParsed = parseIntMaybe(factorStr);
+      const numParsed = parseIntMaybe(numStr);
+      const denParsed = parseIntMaybe(denStr);
+      const decimalParsed = parseDecimalMaybe(decimalStr);
+      const convertNumParsed = parseIntMaybe(convertNumStr);
+      const convertDenParsed = parseIntMaybe(convertDenStr);
+      const unitValueParsed = parseDecimalMaybe(unitValueStr);
+      const startTimeParsed = parseTimeMaybe(startTimeStr);
+      const endTimeParsed = parseTimeMaybe(endTimeStr);
+      const tcHourParsed = parseIntMaybe(tcHourStr);
+      const tcMinParsed = parseIntMaybe(tcMinStr);
+      const tcSecParsed = parseIntMaybe(tcSecStr);
+      const tcFactorParsed = parseIntMaybe(tcFactorStr);
+      const cmpNum1Parsed = parseIntMaybe(cmpNum1Str);
+      const cmpDen1Parsed = parseIntMaybe(cmpDen1Str);
+      const cmpNum2Parsed = parseIntMaybe(cmpNum2Str);
+      const cmpDen2Parsed = parseIntMaybe(cmpDen2Str);
+      const crHeadParsed = parseIntMaybe(crHeadStr);
+      const crLegParsed = parseIntMaybe(crLegStr);
+
+      // GCD / LCM
+      let gcdErr =
+        (!aParsed.ok && !aParsed.empty) ? `A：${aParsed.msg}` :
+        (!bParsed.ok && !bParsed.empty) ? `B：${bParsed.msg}` : "";
+      let lcmErr = gcdErr;
+
+      setStatus("gcdStatus", gcdErr);
+      setStatus("lcmStatus", lcmErr);
+
+      if (aParsed.empty || bParsed.empty) {
+        document.getElementById("gcdBody").innerHTML = '<div class="hint">請先輸入 A、B</div>';
+        document.getElementById("lcmBody").innerHTML = '<div class="hint">請先輸入 A、B</div>';
+      } else if (aParsed.ok && bParsed.ok) {
+        const gcdAB = (aParsed.value === 0 && bParsed.value === 0) ? "未定義（0 和 0）" : String(gcd(aParsed.value, bParsed.value));
+        const lcmAB = lcm(aParsed.value, bParsed.value);
+        document.getElementById("gcdBody").innerHTML = `<div class="bigNumber">${escapeHtml(gcdAB)}</div>`;
+        document.getElementById("lcmBody").innerHTML = `<div class="bigNumber">${escapeHtml(lcmAB === null ? "超過安全整數範圍，無法可靠顯示" : String(lcmAB))}</div>`;
+      } else {
+        document.getElementById("gcdBody").innerHTML = '<div class="muted">—</div>';
+        document.getElementById("lcmBody").innerHTML = '<div class="muted">—</div>';
+      }
+
+      // Prime check
+      err = (!primeCheckParsed.ok && !primeCheckParsed.empty) ? primeCheckParsed.msg : "";
+      setStatus("primeCheckStatus", err);
+      if (primeCheckParsed.empty) {
+        document.getElementById("primeCheckBody").innerHTML = '<div class="hint">請先輸入 n</div>';
+      } else if (primeCheckParsed.ok) {
+        let meta = "";
+        if (primeCheckParsed.value <= 1) {
+          meta = '<div class="meta">依數學定義，質數必須是大於 1 的正整數。</div>';
+        } else if (primeCheckParsed.value < 0) {
+          meta = '<div class="meta">負數不是質數。</div>';
+        }
+        document.getElementById("primeCheckBody").innerHTML =
+          `<div class="bigNumber">${escapeHtml(String(primeCheckParsed.value))}：${isPrime(primeCheckParsed.value) ? "✅ 質數" : "❌ 非質數"}</div>${meta}`;
+      } else {
+        document.getElementById("primeCheckBody").innerHTML = '<div class="muted">—</div>';
+      }
+
+      // Prime range
+      let rangeErr =
+        (!rangeStartParsed.ok && !rangeStartParsed.empty) ? `起點：${rangeStartParsed.msg}` :
+        (!rangeEndParsed.ok && !rangeEndParsed.empty) ? `終點：${rangeEndParsed.msg}` : "";
+      let rangeResult = null;
+      if (rangeStartParsed.ok && rangeEndParsed.ok) {
+        rangeResult = primesInRange(Math.min(rangeStartParsed.value, rangeEndParsed.value), Math.max(rangeStartParsed.value, rangeEndParsed.value));
+        if (rangeResult && rangeResult.error) rangeErr = rangeResult.error;
+      }
+      setStatus("primeRangeStatus", rangeErr);
+      if (rangeStartParsed.empty || rangeEndParsed.empty) {
+        document.getElementById("primeRangeBody").innerHTML = '<div class="hint">請先輸入起點與終點</div>';
+      } else if (rangeStartParsed.ok && rangeEndParsed.ok && rangeResult && !rangeResult.error) {
+        document.getElementById("primeRangeBody").innerHTML =
+          `<div class="meta">共 ${rangeResult.length.toLocaleString()} 個質數（區間：[${Math.min(rangeStartParsed.value, rangeEndParsed.value)}, ${Math.max(rangeStartParsed.value, rangeEndParsed.value)}]）</div>${chipsHtml(rangeResult)}`;
+      } else {
+        document.getElementById("primeRangeBody").innerHTML = '<div class="muted">—</div>';
+      }
+
+      // Factor list
+      err = (!factorListParsed.ok && !factorListParsed.empty) ? factorListParsed.msg : (factorListParsed.ok && listFactors(factorListParsed.value) === null ? "0 的因數無限，無法列出" : "");
+      setStatus("factorListStatus", err);
+      if (factorListParsed.empty) {
+        document.getElementById("factorListBody").innerHTML = '<div class="hint">請先輸入 n</div>';
+      } else if (factorListParsed.ok) {
+        const fl = listFactors(factorListParsed.value);
+        if (fl) {
+          document.getElementById("factorListBody").innerHTML = `<div class="meta">共 ${fl.length.toLocaleString()} 個（以 |n| 計算）</div>${chipsHtml(fl)}`;
+        } else {
+          document.getElementById("factorListBody").innerHTML = '<div class="muted">—</div>';
+        }
+      } else {
+        document.getElementById("factorListBody").innerHTML = '<div class="muted">—</div>';
+      }
+
+      // Factorization
+      err = (!factorParsed.ok && !factorParsed.empty) ? factorParsed.msg : "";
+      if (!err && factorParsed.ok && factorParsed.value <= 0) err = "質因數分解只接受正整數（大於 0）";
+      setStatus("factorStatus", err);
+      const copyPowerBtn = document.getElementById("copyPowerBtn");
+      const copyExpandedBtn = document.getElementById("copyExpandedBtn");
+      if (factorParsed.empty) {
+        document.getElementById("factorBody").innerHTML = '<div class="hint">請先輸入 n</div>';
+        document.getElementById("factorExpandedBody").innerHTML = '<div class="hint">請先輸入 n</div>';
+        document.getElementById("factorCountBody").innerHTML = '<div class="hint">請先輸入 n</div>';
+        copyPowerBtn.disabled = true;
+        copyExpandedBtn.disabled = true;
+      } else if (factorParsed.ok && factorParsed.value > 0) {
+        const fac = primeFactorization(factorParsed.value);
+        document.getElementById("factorBody").innerHTML = `<div class="bigNumber">${escapeHtml(formatPower(fac))}</div><div class="meta">次方格式</div>`;
+        document.getElementById("factorExpandedBody").innerHTML = `<div class="bigNumber">${escapeHtml(formatExpanded(fac))}</div><div class="meta">例如 360 → 2 × 2 × 2 × 3 × 3 × 5</div>`;
+        if (fac.factors && fac.factors.length > 0) {
+          const pills = fac.factors.map(([p, e]) => `<span class="pill">${escapeHtml(String(p))} × ${escapeHtml(String(e))}</span>`);
+          document.getElementById("factorCountBody").innerHTML = pillsHtml(pills);
+        } else {
+          document.getElementById("factorCountBody").innerHTML = '<div class="hint">1 沒有質因數</div>';
+        }
+        copyPowerBtn.disabled = false;
+        copyExpandedBtn.disabled = false;
+      } else {
+        document.getElementById("factorBody").innerHTML = '<div class="muted">—</div>';
+        document.getElementById("factorExpandedBody").innerHTML = '<div class="muted">—</div>';
+        document.getElementById("factorCountBody").innerHTML = '<div class="muted">—</div>';
+        copyPowerBtn.disabled = true;
+        copyExpandedBtn.disabled = true;
+      }
+
+      // Fraction
+      let fracErr =
+        (!numParsed.ok && !numParsed.empty) ? `分子：${numParsed.msg}` :
+        (!denParsed.ok && !denParsed.empty) ? `分母：${denParsed.msg}` : "";
+      let simp = null;
+      if (numParsed.ok && denParsed.ok) {
+        simp = simplifyFraction(numParsed.value, denParsed.value);
+        if (simp && simp.ok === false) fracErr = simp.msg;
+      }
+      setStatus("fractionStatus", fracErr);
+      if (numParsed.empty || denParsed.empty) {
+        document.getElementById("fractionBody").innerHTML = '<div class="hint">請先輸入分子與分母</div>';
+      } else if (numParsed.ok && denParsed.ok && simp && simp.ok) {
+        document.getElementById("fractionBody").innerHTML =
+          `<div class="bigNumber">${escapeHtml(String(numParsed.value))}/${escapeHtml(String(denParsed.value))} → <span class="accent">${escapeHtml(String(simp.num))}/${escapeHtml(String(simp.den))}</span></div><div class="meta">規則：以 GCD(|分子|, |分母|) 約分，並把負號統一放在分子。</div>`;
+      } else {
+        document.getElementById("fractionBody").innerHTML = '<div class="muted">—</div>';
+      }
+
+      // Decimal / Fraction conversion
+      if (decimalParsed.empty) {
+        document.getElementById("decimalToFractionBody").innerHTML = '<div class="hint">請先輸入小數</div>';
+      } else if (decimalParsed.ok) {
+        const frac = decimalStringToFraction(decimalParsed.raw);
+        document.getElementById("decimalToFractionBody").innerHTML =
+          `<div class="bigNumber">${escapeHtml(decimalParsed.raw)} → <span class="accent">${escapeHtml(String(frac.num))}/${escapeHtml(String(frac.den))}</span></div><div class="meta">已自動約成最簡分數</div>`;
+      } else {
+        document.getElementById("decimalToFractionBody").innerHTML = `<div class="error">⚠️ ${escapeHtml(decimalParsed.msg)}</div>`;
+      }
+
+      if (convertNumParsed.empty || convertDenParsed.empty) {
+        document.getElementById("fractionToDecimalBody").innerHTML = '<div class="hint">請先輸入分子與分母</div>';
+      } else if (!convertNumParsed.ok && !convertNumParsed.empty) {
+        document.getElementById("fractionToDecimalBody").innerHTML = `<div class="error">⚠️ 分子：${escapeHtml(convertNumParsed.msg)}</div>`;
+      } else if (!convertDenParsed.ok && !convertDenParsed.empty) {
+        document.getElementById("fractionToDecimalBody").innerHTML = `<div class="error">⚠️ 分母：${escapeHtml(convertDenParsed.msg)}</div>`;
+      } else if (convertDenParsed.value === 0) {
+        document.getElementById("fractionToDecimalBody").innerHTML = '<div class="error">⚠️ 分母不可為 0</div>';
+      } else {
+        const value = convertNumParsed.value / convertDenParsed.value;
+        document.getElementById("fractionToDecimalBody").innerHTML =
+          `<div class="bigNumber">${escapeHtml(String(convertNumParsed.value))}/${escapeHtml(String(convertDenParsed.value))} → <span class="accent">${escapeHtml(formatDecimalValue(value))}</span></div><div class="meta">若為循環小數，會顯示近似值</div>`;
+      }
+
+      // Unit conversion
+      let unitErr = (!unitValueParsed.ok && !unitValueParsed.empty) ? unitValueParsed.msg : "";
+      setStatus("unitStatus", unitErr);
+      if (unitValueParsed.empty) {
+        document.getElementById("unitBody").innerHTML = '<div class="hint">請先輸入數值</div>';
+      } else if (unitValueParsed.ok) {
+        const fromItem = getUnitItem(unitCategory, unitFrom);
+        const toItem = getUnitItem(unitCategory, unitTo);
+        if (fromItem && toItem) {
+          const baseValue = unitValueParsed.value * fromItem.factor;
+          const resultValue = baseValue / toItem.factor;
+          document.getElementById("unitBody").innerHTML =
+            `<div class="bigNumber">${escapeHtml(formatByFourDigits(unitValueParsed.value))} ${escapeHtml(fromItem.label)} → <span class="accent">${escapeHtml(formatByFourDigits(resultValue))} ${escapeHtml(toItem.label)}</span></div><div class="meta">1 ${escapeHtml(fromItem.label)} = ${escapeHtml(formatByFourDigits(fromItem.factor / toItem.factor))} ${escapeHtml(toItem.label)}（大數依四位一節顯示）</div>`;
+        } else {
+          document.getElementById("unitBody").innerHTML = '<div class="muted">—</div>';
+        }
+      } else {
+        document.getElementById("unitBody").innerHTML = '<div class="muted">—</div>';
+      }
+
+      // Time difference
+      let timeErr =
+        (!startTimeParsed.ok && !startTimeParsed.empty) ? `開始時間：${startTimeParsed.msg}` :
+        (!endTimeParsed.ok && !endTimeParsed.empty) ? `結束時間：${endTimeParsed.msg}` : "";
+      setStatus("timeDiffStatus", timeErr);
+      if (startTimeParsed.empty || endTimeParsed.empty) {
+        document.getElementById("timeDiffBody").innerHTML = '<div class="hint">請先輸入開始時間與結束時間</div>';
+      } else if (startTimeParsed.ok && endTimeParsed.ok) {
+        let diff = endTimeParsed.minutes - startTimeParsed.minutes;
+        let crossed = false;
+        if (diff < 0) {
+          diff += 24 * 60;
+          crossed = true;
+        }
+        const hours = Math.floor(diff / 60);
+        const minutes = diff % 60;
+        document.getElementById("timeDiffBody").innerHTML =
+          `<div class="bigNumber">${hours} 小時 ${minutes} 分</div><div class="meta">共 ${diff} 分鐘${crossed ? "（結束時間早於開始時間，已視為隔天）" : ""}</div>`;
+      } else {
+        document.getElementById("timeDiffBody").innerHTML = '<div class="muted">—</div>';
+      }
+
+      // Time multiply / divide
+      let timeCalcErr =
+        (!tcHourParsed.ok && !tcHourParsed.empty) ? `時：${tcHourParsed.msg}` :
+        (!tcMinParsed.ok && !tcMinParsed.empty) ? `分：${tcMinParsed.msg}` :
+        (!tcSecParsed.ok && !tcSecParsed.empty) ? `秒：${tcSecParsed.msg}` :
+        (!tcFactorParsed.ok && !tcFactorParsed.empty) ? `數字：${tcFactorParsed.msg}` : "";
+
+      if (!timeCalcErr && tcHourParsed.ok && tcMinParsed.ok && tcSecParsed.ok && tcFactorParsed.ok) {
+        if (tcHourParsed.value < 0 || tcMinParsed.value < 0 || tcSecParsed.value < 0) {
+          timeCalcErr = "時間不可小於 0";
+        } else if (tcMinParsed.value >= 60 || tcSecParsed.value >= 60) {
+          timeCalcErr = "分、秒都要小於 60";
+        } else if (tcFactorParsed.value < 0) {
+          timeCalcErr = "數字不可小於 0";
+        } else if (tcOp === "div" && tcFactorParsed.value === 0) {
+          timeCalcErr = "除數不可為 0";
+        }
+      }
+
+      setStatus("timeCalcStatus", timeCalcErr);
+
+      if (tcHourParsed.empty || tcMinParsed.empty || tcSecParsed.empty || tcFactorParsed.empty) {
+        document.getElementById("timeCalcBody").innerHTML = '<div class="hint">請先輸入時間與要乘除的數字</div>';
+        document.getElementById("timeCalcStepBody").innerHTML = '<div class="hint">請先輸入時間與要乘除的數字</div>';
+      } else if (!timeCalcErr && tcHourParsed.ok && tcMinParsed.ok && tcSecParsed.ok && tcFactorParsed.ok) {
+        const totalSeconds = tcHourParsed.value * 3600 + tcMinParsed.value * 60 + tcSecParsed.value;
+        const resultSeconds = tcOp === "mul" ? totalSeconds * tcFactorParsed.value : totalSeconds / tcFactorParsed.value;
+        const opSymbol = tcOp === "mul" ? "×" : "÷";
+
+        document.getElementById("timeCalcBody").innerHTML =
+          `<div class="bigNumber">${tcHourParsed.value}時 ${tcMinParsed.value}分 ${tcSecParsed.value}秒 ${opSymbol} ${tcFactorParsed.value} = <span class="accent">${escapeHtml(formatTimeHMS(resultSeconds))}</span></div>` +
+          `<div class="meta">原本共有 ${escapeHtml(formatDecimalValue(totalSeconds))} 秒，結果為 ${escapeHtml(formatDecimalValue(resultSeconds))} 秒</div>`;
+
+        document.getElementById("timeCalcStepBody").innerHTML =
+          `<div class="meta">1. 先把時間全部換成秒：${tcHourParsed.value} × 3600 + ${tcMinParsed.value} × 60 + ${tcSecParsed.value} = ${escapeHtml(formatDecimalValue(totalSeconds))} 秒</div>` +
+          `<div class="meta">2. 再做運算：${escapeHtml(formatDecimalValue(totalSeconds))} ${opSymbol} ${tcFactorParsed.value} = ${escapeHtml(formatDecimalValue(resultSeconds))} 秒</div>` +
+          `<div class="meta">3. 最後把 ${escapeHtml(formatDecimalValue(resultSeconds))} 秒換回時分秒：${escapeHtml(formatTimeHMS(resultSeconds))}</div>`;
+      } else {
+        document.getElementById("timeCalcBody").innerHTML = '<div class="muted">—</div>';
+        document.getElementById("timeCalcStepBody").innerHTML = `<div class="error">⚠️ ${escapeHtml(timeCalcErr)}</div>`;
+      }
+
+      // Fraction comparison
+      let compareErr =
+        (!cmpNum1Parsed.ok && !cmpNum1Parsed.empty) ? `A 分子：${cmpNum1Parsed.msg}` :
+        (!cmpDen1Parsed.ok && !cmpDen1Parsed.empty) ? `A 分母：${cmpDen1Parsed.msg}` :
+        (!cmpNum2Parsed.ok && !cmpNum2Parsed.empty) ? `B 分子：${cmpNum2Parsed.msg}` :
+        (!cmpDen2Parsed.ok && !cmpDen2Parsed.empty) ? `B 分母：${cmpDen2Parsed.msg}` : "";
+      if (cmpDen1Parsed.ok && cmpDen1Parsed.value === 0) compareErr = "A 分母不可為 0";
+      if (!compareErr && cmpDen2Parsed.ok && cmpDen2Parsed.value === 0) compareErr = "B 分母不可為 0";
+      setStatus("compareStatus", compareErr);
+
+      if (cmpNum1Parsed.empty || cmpDen1Parsed.empty || cmpNum2Parsed.empty || cmpDen2Parsed.empty) {
+        document.getElementById("compareBody").innerHTML = '<div class="hint">請先輸入兩個分數</div>';
+        document.getElementById("compareLineBody").innerHTML = '<div class="hint">請先輸入兩個分數</div>';
+      } else if (!compareErr) {
+        const a = simplifyFraction(cmpNum1Parsed.value, cmpDen1Parsed.value);
+        const b = simplifyFraction(cmpNum2Parsed.value, cmpDen2Parsed.value);
+        const lcd = lcm(a.den, b.den);
+        const aa = a.num * (lcd / a.den);
+        const bb = b.num * (lcd / b.den);
+        const symbol = aa > bb ? ">" : (aa < bb ? "<" : "=");
+        const v1 = a.num / a.den;
+        const v2 = b.num / b.den;
+        document.getElementById("compareBody").innerHTML =
+          `<div class="bigNumber">${escapeHtml(String(a.num))}/${escapeHtml(String(a.den))} ${symbol} ${escapeHtml(String(b.num))}/${escapeHtml(String(b.den))}</div><div class="meta">通分到 ${lcd}：A = ${aa}/${lcd}，B = ${bb}/${lcd}</div>`;
+        document.getElementById("compareLineBody").innerHTML = buildCompareLine(v1, v2, `${a.num}/${a.den}`, `${b.num}/${b.den}`);
+      } else {
+        document.getElementById("compareBody").innerHTML = '<div class="muted">—</div>';
+        document.getElementById("compareLineBody").innerHTML = '<div class="muted">—</div>';
+      }
+
+      // Chicken / Rabbit
+      let crErr =
+        (!crHeadParsed.ok && !crHeadParsed.empty) ? `頭數：${crHeadParsed.msg}` :
+        (!crLegParsed.ok && !crLegParsed.empty) ? `腳數：${crLegParsed.msg}` : "";
+
+      if (!crErr && crHeadParsed.ok && crLegParsed.ok) {
+        if (crHeadParsed.value < 0) crErr = "頭數不可小於 0";
+        else if (crLegParsed.value < 0) crErr = "腳數不可小於 0";
+        else if (crLegParsed.value % 2 !== 0) crErr = "腳數必須是偶數";
+        else if (crLegParsed.value < crHeadParsed.value * 2) crErr = "腳數太少，無法成立";
+        else if (crLegParsed.value > crHeadParsed.value * 4) crErr = "腳數太多，無法成立";
+        else {
+          const rabbit = (crLegParsed.value - crHeadParsed.value * 2) / 2;
+          const chicken = crHeadParsed.value - rabbit;
+          if (!Number.isInteger(rabbit) || !Number.isInteger(chicken)) {
+            crErr = "無整數解";
+          } else if (rabbit < 0 || chicken < 0) {
+            crErr = "答案不可為負數，無法成立";
+          }
+        }
+      }
+
+      setStatus("crStatus", crErr);
+
+      if (crHeadParsed.empty || crLegParsed.empty) {
+        document.getElementById("crBody").innerHTML = '<div class="hint">請先輸入頭數與腳數</div>';
+        document.getElementById("crStepBody").innerHTML = '<div class="hint">請先輸入頭數與腳數</div>';
+      } else if (!crErr && crHeadParsed.ok && crLegParsed.ok) {
+        const rabbit = (crLegParsed.value - crHeadParsed.value * 2) / 2;
+        const chicken = crHeadParsed.value - rabbit;
+        const extraLegs = crLegParsed.value - crHeadParsed.value * 2;
+
+        document.getElementById("crBody").innerHTML =
+          `<div class="bigNumber">雞：<span class="accent">${chicken}</span>　兔：<span class="accent">${rabbit}</span></div><div class="meta">驗算：${chicken} × 2 + ${rabbit} × 4 = ${crLegParsed.value}</div>`;
+
+        document.getElementById("crStepBody").innerHTML =
+          `<div class="meta">1. 先假設全部都是雞：${crHeadParsed.value} 隻雞會有 ${crHeadParsed.value * 2} 隻腳</div>` +
+          `<div class="meta">2. 但實際共有 ${crLegParsed.value} 隻腳，所以多出 ${extraLegs} 隻腳</div>` +
+          `<div class="meta">3. 每 1 隻兔比雞多 2 隻腳，所以兔有 ${extraLegs} ÷ 2 = ${rabbit} 隻</div>` +
+          `<div class="meta">4. 雞有 ${crHeadParsed.value} - ${rabbit} = ${chicken} 隻</div>`;
+      } else {
+        document.getElementById("crBody").innerHTML = '<div class="muted">—</div>';
+        document.getElementById("crStepBody").innerHTML = `<div class="error">⚠️ ${escapeHtml(crErr)}</div>`;
+      }
+    }
+
+    document.querySelectorAll(".auto-select").forEach((el) => {
+      el.addEventListener("focus", (e) => {
+        try { e.target.select(); } catch (_err) {}
+      });
+      el.addEventListener("input", render);
+    });
+    document.querySelectorAll(".input:not(.auto-select)").forEach((el) => {
+      el.addEventListener("input", render);
+      el.addEventListener("change", render);
+    });
+    document.querySelectorAll(".select").forEach((el) => {
+      el.addEventListener("change", () => {
+        if (el.id === "unitCategory") {
+          syncUnitSelectOptions();
+        }
+        render();
+      });
+    });
+
+    // 讓單位換算在第一次打開頁面時就有完整選單，不需要先切換類別
+    syncUnitSelectOptions();
+
+    function flashCopy(msg) {
+      const el = document.getElementById("copyMsg");
+      el.textContent = msg;
+      setTimeout(() => {
+        if (el.textContent === msg) el.textContent = "";
+      }, 1200);
+    }
+
+    document.getElementById("factorClearBtn").addEventListener("click", () => {
+      document.getElementById("factorStr").value = "";
+      render();
+    });
+
+    document.getElementById("copyPowerBtn").addEventListener("click", async () => {
+      const parsed = parseIntMaybe(document.getElementById("factorStr").value);
+      if (!parsed.ok || parsed.value <= 0) return;
+      try {
+        await navigator.clipboard.writeText(formatPower(primeFactorization(parsed.value)));
+        flashCopy("已複製");
+      } catch (_err) {
+        flashCopy("複製失敗");
+      }
+    });
+
+    document.getElementById("copyExpandedBtn").addEventListener("click", async () => {
+      const parsed = parseIntMaybe(document.getElementById("factorStr").value);
+      if (!parsed.ok || parsed.value <= 0) return;
+      try {
+        await navigator.clipboard.writeText(formatExpanded(primeFactorization(parsed.value)));
+        flashCopy("已複製");
+      } catch (_err) {
+        flashCopy("複製失敗");
+      }
+    });
+
+    document.getElementById("clearAllBtn").addEventListener("click", () => {
+      document.querySelectorAll(".input").forEach((el) => {
+        el.value = "";
+      });
+      const copyMsg = document.getElementById("copyMsg");
+      if (copyMsg) copyMsg.textContent = "";
+
+      const unitCategory = document.getElementById("unitCategory");
+      if (unitCategory) unitCategory.value = "length";
+      syncUnitSelectOptions();
+
+      render();
+    });
+
+    document.querySelectorAll(".tabBtn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const targetId = btn.getAttribute("data-tab-target");
+        document.querySelectorAll(".tabBtn").forEach((b) => b.classList.remove("activeTabBtn"));
+        btn.classList.add("activeTabBtn");
+        document.querySelectorAll(".tabSection").forEach((sec) => sec.classList.remove("activeTabSection"));
+        const target = document.getElementById(targetId);
+        if (target) target.classList.add("activeTabSection");
+      });
+    });
+
+    render();
+  </script>
+
+  <script>
+    // PWA 註冊：用相對路徑，方便 GitHub Pages / Firebase Hosting / 一般 HTTPS 靜態網站部署
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./service-worker.js", { scope: "./" })
+          .then((registration) => {
+            registration.update();
+          })
+          .catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>
