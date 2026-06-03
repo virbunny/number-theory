@@ -1,5 +1,5 @@
-// 2026-05-14 23:41:22;來自厲害的Chatgpt V42-PWA
-const CACHE_NAME = "mitu-number-toolbox-v42-pwa";
+// 2026-06-03 21:18:19;來自厲害的Chatgpt V43-PWA
+const CACHE_NAME = "mitu-number-toolbox-v43-pwa";
 const APP_SHELL = [
   "./",
   "./index.html",

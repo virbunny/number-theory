@@ -1,4 +1,4 @@
-# 米兔數論工具箱 PWA V42-PWA
+# 米兔數論工具箱 PWA V43-PWA
 
 ## 內容
 - `index.html`：PWA 入口檔
@@ -18,4 +18,9 @@ PWA 安裝必須使用 HTTPS，單純用本機 `file://` 開啟不會出現正�
 - 畫面標題改為：米兔數論工具箱
 - HTML `<title>` 改為：米兔數論工具箱
 - manifest app name 同步改為：米兔數論工具箱
-- Service Worker cache 升級為 V42-PWA，降低舊快取殘留。
+- Service Worker cache 升級為 V43-PWA，降低舊快取殘留。
+
+## V43-PWA 修改
+- 「時間的乘除」新增「日」欄位。
+- 換算結果與計算步驟同步改為「日、時、分、秒」。
+- Service Worker 快取版號已更新，降低吃到舊版快取的機率。
